@@ -1,0 +1,30 @@
+
+services:
+  db:
+    image: postgres:15
+    container_name: Bookkit_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Migrate
+      POSTGRES_DB: Bookkit_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile   # ✅ put dockerfile here, not at the root
+    container_name: Bookkit_api
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:Migrate@db:5432/Bookkit_db
+      SECRET_KEY: supersecretjwtkey
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:
