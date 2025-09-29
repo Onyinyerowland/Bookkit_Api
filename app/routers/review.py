@@ -2,10 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.review import ReviewCreate, ReviewOut
 from app.deps import get_current_user, get_db_session
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.repositories.booking_repo import BookingRepo
+from app.models.review import Review
+from sqlalchemy import select
 
-router = APIRouter(prefix='/reviews', tags=['reviews'])
 
-@router.post(' ', response_model=ReviewOut, status_code=status.HTTP_201_CREATED)
+router = APIRouter()
+
+@router.post('/', response_model=ReviewOut, status_code=status.HTTP_201_CREATED)
 async def create_review(payload: ReviewCreate, db: AsyncSession = Depends(get_db_session), user=Depends(get_current_user)):
     # Validate booking completed and owned by user
     from app.repositories.booking_repo import BookingRepo
@@ -25,25 +29,25 @@ async def create_review(payload: ReviewCreate, db: AsyncSession = Depends(get_db
     await db.refresh(r)
     return r
 
-@router.get('{service_id}', response_model=list[ReviewOut])
-async def list_service_reviews(service_id: int, db: AsyncSession = Depends(get_db_session)):
+@router.get('/{service_id}', response_model=list[ReviewOut])
+async def list_service_reviews( service_id: int, limit: int = 10, skip: int = 0, db: AsyncSession = Depends(get_db_session)):
     from sqlalchemy import select
     from app.models.review import Review
     from app.models.booking import Booking
-    q = select(Review).join(Booking).where(Booking.service_id == service_id)
+    q = select(Review).join(Booking).where(Booking.service_id == service_id).offset(skip).limit(limit)
     res = await db.execute(q)
     return res.scalars().all()
 
-@router.patch('{id}', response_model=ReviewOut)
-async def patch_review(id: int, payload: ReviewCreate, db: AsyncSession = Depends(get_db_session), user=Depends(get_current_user)):
-    from app.models.review import Review
-    from sqlalchemy import select
+@router.patch('/{id}', response_model=ReviewOut)
+async def update_review(id: int, payload: ReviewCreate, db: AsyncSession = Depends(get_db_session), user=Depends(get_current_user)):
+    # only owner can update
+
     res = await db.execute(select(Review).where(Review.id == id))
     r = res.scalars().first()
     if not r:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     # check owner
-    from app.repositories.booking_repo import BookingRepo
+
     booking = await BookingRepo(db).get_by_id(r.booking_id)
     if booking.user_id != user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
@@ -54,19 +58,18 @@ async def patch_review(id: int, payload: ReviewCreate, db: AsyncSession = Depend
     await db.refresh(r)
     return r
 
-@router.delete('{id}')
+
+@router.delete('/{id}')
 async def delete_review(id: int, db: AsyncSession = Depends(get_db_session), user=Depends(get_current_user)):
-    from app.models.review import Review
-    from sqlalchemy import select
+
     res = await db.execute(select(Review).where(Review.id == id))
     r = res.scalars().first()
     if not r:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    from app.repositories.booking_repo import BookingRepo
+
     booking = await BookingRepo(db).get_by_id(r.booking_id)
     if booking.user_id == user.id or user.role.name == 'admin' or user.role == 'admin':
         await db.delete(r)
         await db.commit()
         return {'msg': 'deleted'}
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-

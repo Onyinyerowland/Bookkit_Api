@@ -25,8 +25,8 @@ COPY . .
 EXPOSE 8000
 
 # 8️⃣ Run the app with uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-# Note: Changed "app.main:get_app" to "app.main:app" to match the FastAPI instance name
+CMD ["uvicorn", "app.main:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
+
 # If you want to use the factory function, change it back to "app.main:create_app"
 # and ensure that the function is correctly defined to return the FastAPI instance.
 # Also, added --reload for development purposes; remove it for production.
@@ -36,4 +36,3 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload
 # CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker",
 #      "app.main:app", "--bind", "
 #      "
-

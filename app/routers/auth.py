@@ -1,21 +1,14 @@
-from fastapi import APIRouter, Depends, Response, Cookie, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.schemas.user import (
-    UserCreate,
-    UserLogin,
-    UserOut,
-    ChangePasswordRequest,
-    ResetPasswordRequest,
-)
-from app.schemas.auth import Token
 from app.deps import get_db_session, get_current_user
+from app.schemas.auth import Token
+from app.schemas.user import UserOut, UserCreate, UserLogin, ChangePasswordRequest, ResetPasswordRequest
 from app.services.auth_service import AuthService
-from app.models import User
+from app.models.user import User
 from app.utils.security import create_access_token, decode_token
+from typing import Optional
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
-
+router = APIRouter()
 
 # ---------- Register ----------
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)

@@ -12,18 +12,22 @@ from loguru import logger
 from app.core.config import settings
 from app.routers import auth, user, service, booking, review
 
-
-def get_app() -> FastAPI:
-    return app
 def create_app() -> FastAPI:
-    """Create and configure the FastAPI application."""
     app = FastAPI(
-        title="BookIt API",
+        title="Bookkit API",
         version="1.0.0",
         docs_url="/docs",
         redoc_url="/redoc"
     )
 
+    @app.get("/", tags=["home"])
+    async def read_root():
+        return {
+            "message": "Welcome to BookIt API 🎉",
+            "docs": "/docs",
+            "redoc": "/redoc",
+            "version": "1.0.0"
+        }
 
     # CORS middleware
     app.add_middleware(
@@ -46,13 +50,7 @@ def create_app() -> FastAPI:
     app.include_router(review.router, prefix="/review", tags=["review"])
 
     return app
-
-
-# Global app instance for ASGI servers and testing
 app = create_app()
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host=str(settings.HOST), port=settings.PORT)
-    logger.info(f"Starting server at http://{settings.HOST}:{settings.PORT}")
-    logger.info("BookIt API started")
-    logger.info("BookIt API shutdown")
+
+for route in app.routes:
+    print(route.path)

@@ -7,11 +7,11 @@ from app.repositories.service_repo import ServiceRepo
 from datetime import datetime
 from app.repositories.booking_repo import BookingRepo
 
-router = APIRouter(prefix='/bookings', tags=['bookings'])
+router = APIRouter()
 
 
 
-@router.post('', status_code=201)
+@router.post('/', status_code=201)
 async def create_booking(payload: BookingCreate, user = Depends(get_current_user), db = Depends(get_db_session)):
     svc = BookingService(db)
     try:
@@ -25,7 +25,7 @@ async def create_booking(payload: BookingCreate, user = Depends(get_current_user
         raise
 
 
-@router.get('', response_model=list[BookingOut])
+@router.get('/', response_model=list[BookingOut])
 async def list_bookings(status: str | None = Query(None), from_dt: datetime | None = Query(None), to_dt: datetime | None = Query(None), user = Depends(get_current_user), db = Depends(get_db_session)):
     svc = BookingService(db)
     if user.role.value == 'admin':
@@ -83,4 +83,3 @@ async def patch_booking(id: str, payload: BookingUpdate, user = Depends(get_curr
         updated = await svc.update(booking, status='cancelled')
         return updated
     raise HTTPException(400, 'Nothing to update')
-

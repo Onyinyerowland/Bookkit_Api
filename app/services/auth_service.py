@@ -1,5 +1,10 @@
 from ..repositories.user_repo import UserRepo
-from ..utils import hash_password, verify_password, create_access_token, create_refresh_token
+from app.utils.security import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    create_refresh_token
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -58,4 +63,14 @@ class AuthService:
         new_hash = hash_password(new_password)
         user = await self.user_repo.update(user, password_hash=new_hash)
         return user
-
+    async def hash_password(self, password: str) -> str:
+        return hash_password(password)
+    async def verify_password(self, plain_password: str, hashed_password: str) -> bool:
+        return verify_password(plain_password, hashed_password)
+    async def create_access_token(self, subject: str, role: str, expires_delta=None) -> str:
+        return create_access_token(subject, role, expires_delta)
+    async def create_refresh_token(self, subject: str, expires_days=None) -> str:
+        return create_refresh_token(subject, expires_days)
+    async def decode_token(self, token: str) -> dict:
+        from ..utils.security import decode_token
+        return decode_token(token)

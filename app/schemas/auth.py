@@ -13,6 +13,7 @@ class TokenPayload(BaseModel):
     exp: datetime
 
     @field_validator("exp", mode="before")
+    @classmethod
     def convert_exp(cls, v):
         # Convert UNIX timestamp (int) -> datetime
         if isinstance(v, int):
@@ -24,9 +25,9 @@ class RefreshTokenPayload(BaseModel):
     exp: datetime
 
     @field_validator("exp", mode="before")
+    @classmethod
     def convert_exp(cls, v):
         # Convert UNIX timestamp (int) -> datetime
         if isinstance(v, int):
             return datetime.fromtimestamp(v, tz=timezone.utc)
         return v
-

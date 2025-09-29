@@ -10,13 +10,8 @@ class Review(Base):
     rating = Column(Integer, nullable=False)
     comment = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    booking = relationship('Booking', back_populates='review')
-    user = relationship('User', secondary='bookings', back_populates='reviews')
-    service = relationship('Service', secondary='bookings', back_populates='reviews')
-    # Ensure a user can only review a service they booked
-    __table_args__ = (
-        # UniqueConstraint('booking_id', name='uix_booking_review'),
-    )
+
+    bookings= relationship('Booking', back_populates='review')
+
     def __repr__(self):
         return f"<Review(id={self.id}, booking_id={self.booking_id}, rating={self.rating})>"
-    

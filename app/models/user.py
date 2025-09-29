@@ -4,17 +4,16 @@ from app.db import Base
 from sqlalchemy.orm import relationship
 
 
-class Service(Base):
-    __tablename__ = 'services'
+class User(Base):
+    __tablename__ = "users"
     id = Column(Integer, primary_key=True)
-    title = Column(String(256), nullable=False)
-    description = Column(Text)
-    price = Column(Numeric(10,2), nullable=False)
-    duration_minutes = Column(Integer, nullable=False)
+    name = Column(String(100), nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
+    # other fields...
+    role = Column(String(50), nullable=False, server_default='user')  # e.g., 'admin', 'user'
     is_active = Column(Boolean, nullable=False, server_default='true')
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    bookings = relationship('Booking', back_populates='service')
-    reviews = relationship('Review', back_populates='service')
+    bookings = relationship('Booking', back_populates='user')
     def __repr__(self):
-        return f"<Service(id={self.id}, title={self.title}, price={self.price})>"
+        return f"<User(id={self.id}, name={self.name}, email={self.email}, role={self.role})>"
     

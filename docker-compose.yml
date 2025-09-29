@@ -17,7 +17,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile   # ✅ put dockerfile here, not at the root
-    container_name: Bookkit_api
+    container_name: Bookkit-api
     depends_on:
       - db
     environment:

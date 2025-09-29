@@ -57,4 +57,5 @@ def refresh_access_token(refresh_token: str) -> str | None:
 
 
 def decode_token(token: str) -> dict:
-    return jwt.decode(token, settings.secret_key, algorithms=["HS256"])
+    return jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+
